@@ -1,10 +1,16 @@
 🚀 Horizon Bleu Logistique - Interactive Business Plan
+----
+
 🌟 Overview
+----
+
 This HTML file, business_plan_app.html, is a single-page interactive web application that serves as a dynamic business plan for "Horizon Bleu Logistique," a proposed fish 🐟 transportation 🚚 company in Laâyoune, Morocco 🇲🇦.
 
 Its primary purpose is to present a compelling and data-driven case for a loan application through the Moroccan government's "Intelaka" financing program 💰.
 
 ✨ Key Features & Sections
+----
+
 The application is structured as a professional, scrollable dashboard with the following sections:
 
 🌍 Aperçu (Overview): High-level summary of the project and the total funding request.
@@ -26,6 +32,8 @@ A dynamic bar chart visualizes these financial projections in real-time 📊.
 📝 Demande de Prêt (Loan Request): A summary of the loan structure and the intended use of funds, based on the figures from the interactive financial planner.
 
 🛠️ Technologies Used
+----
+
 HTML5: For the core structure and content.
 
 Tailwind CSS: For modern, responsive styling 🎨.
@@ -34,5 +42,3 @@ JavaScript (Vanilla): To handle user interactions, update calculations, and mana
 
 Chart.js: For creating the dynamic and responsive charts 📈.
 
-🚀 How to Use
-👉 Simply open the business_plan_app.html file in any modern web browser 🌐. All dependencies (Tailwind CSS, Chart.js, and Google Fonts) are loaded via CDN, so no local setup is required. Interact with the sliders in the "Finances" section to explore different financial scenarios!

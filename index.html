@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon Bleu Logistique : Plan d'Affaires & Demande de Prêt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Coastal Professional -->
+    <!-- Application Structure Plan: The application is designed as a single-page, scrollable dashboard with a sticky navigation bar. This structure allows a linear, story-like progression from the market problem to the proposed solution and financial request, which is ideal for a loan application. The flow is: 1. High-level summary, 2. Deep dive into the market opportunity with data, 3. The specific business model and strategy, 4. An interactive financial planner (the core tool), 5. Founder credentials, and 6. A concluding loan summary. This task-oriented design focuses on demonstrating viability and answering a banker's key questions, with interactive calculators to allow for dynamic scenario planning. -->
+    <!-- Visualization & Content Choices: 
+        - Market Problem (Price Spread): Report Info -> Fish price increases significantly from port to retail. Goal -> Compare. Viz -> Bar Chart (Chart.js). Interaction -> Static visualization to establish the core problem clearly. Justification -> A bar chart provides a stark, immediate visual comparison of the value lost in the middle mile.
+        - Financial Projections: Report Info -> Need for projected cash flow. Goal -> Show Change/Growth. Viz -> Grouped Bar Chart (Chart.js). Interaction -> Chart dynamically updates when user changes assumptions in the financial calculator (number of trucks, revenue). Justification -> This directly connects user inputs to financial outcomes, making the plan a live, exploratory tool.
+        - Supply Chain Model: Report Info -> Need to explain the subcontracting model. Goal -> Organize/Explain. Method -> HTML/CSS Diagram using Tailwind Flexbox. Interaction -> Static. Justification -> A clean, simple visual flow is more effective than a complex diagram for explaining the business's role. It avoids SVG/Mermaid as required.
+        - Financial Calculators: Report Info -> Need for cost estimates and loan details. Goal -> Inform/Calculate. Method -> Interactive HTML forms with JS. Interaction -> User inputs numbers, outputs are calculated and displayed instantly. Justification -> This is the most critical interactive element, empowering the user to build their own financial case and understand the funding requirements directly.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .sticky-nav {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 300px;
+            }
+        }
+        .stat-card {
+            background-color: white;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .btn-primary {
+            background-color: #0A2463;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #3E92CC;
+        }
+        .section-title {
+            color: #0A2463;
+            font-weight: 700;
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            border-bottom: 3px solid #3E92CC;
+            padding-bottom: 0.5rem;
+        }
+        .pill {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-white shadow-md sticky-nav">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-[#0A2463]">
+                <span class="text-[#3E92CC]">⛟</span> Horizon Bleu Logistique
+            </div>
+            <div class="hidden md:flex space-x-6 items-center">
+                <a href="#overview" class="text-gray-600 hover:text-[#3E92CC]">Aperçu</a>
+                <a href="#market" class="text-gray-600 hover:text-[#3E92CC]">Marché</a>
+                <a href="#model" class="text-gray-600 hover:text-[#3E92CC]">Modèle Économique</a>
+                <a href="#financials" class="text-gray-600 hover:text-[#3E92CC]">Finances</a>
+                <a href="#founder" class="text-gray-600 hover:text-[#3E92CC]">Fondateur</a>
+                <a href="#loan" class="btn-primary">Demande de Prêt</a>
+            </div>
+            <div class="md:hidden">
+                <button id="menu-btn" class="text-[#0A2463] focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#overview" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Aperçu</a>
+            <a href="#market" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Marché</a>
+            <a href="#model" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Modèle Économique</a>
+            <a href="#financials" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Finances</a>
+            <a href="#founder" class="block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100">Fondateur</a>
+            <a href="#loan" class="block py-2 px-4 text-sm text-white bg-[#0A2463] hover:bg-[#3E92CC]">Demande de Prêt</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-12">
+        
+        <section id="overview" class="mb-24 scroll-mt-20">
+            <h1 class="text-4xl md:text-5xl font-bold text-[#0A2463] mb-4 text-center">Plan d'Affaires pour la Distribution & Logistique de Poisson</h1>
+            <p class="text-xl text-gray-600 text-center max-w-3xl mx-auto">
+                Une demande pour le programme de financement Intelaka pour lancer une entreprise de transport de poisson moderne et axée sur la technologie, basée à Laâyoune, le principal pôle de pêche du Maroc.
+            </p>
+            <div class="mt-12 grid md:grid-cols-3 gap-8 text-center">
+                <div class="stat-card">
+                    <h3 class="text-4xl font-bold text-[#3E92CC]" id="loan-amount-display">1,200,000</h3>
+                    <p class="text-gray-500 mt-2">Demande de Financement Totale (MAD)</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-4xl font-bold text-[#3E92CC]">Laâyoune</h3>
+                    <p class="text-gray-500 mt-2">Hub Opérationnel</p>
+                </div>
+                <div class="stat-card">
+                    <h3 class="text-4xl font-bold text-[#3E92CC]">Sous-traitance</h3>
+                    <p class="text-gray-500 mt-2">Modèle Économique Principal</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="market" class="mb-24 scroll-mt-20">
+            <h2 class="section-title mb-8">L'Opportunité du Marché</h2>
+            <p class="text-lg text-gray-700 mb-12 max-w-4xl mx-auto">
+                Cette section décrit l'opportunité de marché significative dans la chaîne d'approvisionnement des produits de la mer au Maroc. L'industrie est robuste, mais souffre d'inefficacités logistiques, en particulier dans le transport « middle mile » des ports du sud vers les centres de consommation du nord. Cela crée une ouverture claire pour un fournisseur de logistique moderne axé sur la qualité, la fiabilité et la transparence. Notre base à Laâyoune, le port de pêche le plus précieux du pays, nous positionne parfaitement pour saisir cette opportunité.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-8 items-center">
+                <div>
+                    <h3 class="text-2xl font-bold text-[#0A2463] mb-4">Laâyoune : L'Épicentre Économique</h3>
+                    <p class="text-gray-700 mb-6">Laâyoune n'est pas seulement un port ; c'est un complexe industriel qui a généré plus de <span class="font-bold text-[#3E92CC]">1,6 milliard de MAD</span> de chiffre d'affaires en 2023, ce qui en fait le premier port de pêche du Maroc en valeur. Cette concentration de produits à haute valeur ajoutée crée une demande immense et constante pour un transport spécialisé.</p>
+                    <h3 class="text-2xl font-bold text-[#0A2463] mb-4">Le Problème du « Middle Mile »</h3>
+                    <p class="text-gray-700">Le trajet du port au marché est miné par les intermédiaires, ce qui entraîne une inflation des prix et une dégradation potentielle de la qualité. Par exemple, le prix des sardines peut augmenter de plus de 500 % entre la vente en gros et le marché de détail final. C'est un écart de valeur que nous visons à combler.</p>
+                </div>
+                <div class="bg-white p-4 rounded-lg shadow-lg">
+                    <div class="chart-container">
+                        <canvas id="marketProblemChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="model" class="mb-24 scroll-mt-20">
+            <h2 class="section-title mb-8">Modèle Économique & Stratégie</h2>
+            <p class="text-lg text-gray-700 mb-12 max-w-4xl mx-auto">
+                Notre modèle économique est conçu pour répondre directement aux principaux problèmes du marché. Nous opérerons sur la base de la sous-traitance avec les principaux producteurs et distributeurs de poisson. Notre avantage concurrentiel reposera sur trois piliers : la transparence technologique, la fiabilité opérationnelle et les partenariats stratégiques. Cette approche minimise les risques tout en maximisant la valeur pour nos clients.
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="stat-card p-6 text-center">
+                    <div class="text-4xl mb-4">📡</div>
+                    <h3 class="text-xl font-bold text-[#0A2463] mb-2">Transparence Technologique</h3>
+                    <p class="text-gray-600">Suivi GPS en temps réel et surveillance de la température pour chaque envoi, offrant une tranquillité d'esprit totale.</p>
+                </div>
+                <div class="stat-card p-6 text-center">
+                    <div class="text-4xl mb-4">⏱️</div>
+                    <h3 class="text-xl font-bold text-[#0A2463] mb-2">Fiabilité Opérationnelle</h3>
+                    <p class="text-gray-600">Un réseau de chauffeurs et de véhicules agréés garantissant des livraisons ponctuelles et le respect de la chaîne du froid.</p>
+                </div>
+                <div class="stat-card p-6 text-center">
+                    <div class="text-4xl mb-4">🤝</div>
+                    <h3 class="text-xl font-bold text-[#0A2463] mb-2">Partenariats Stratégiques</h3>
+                    <p class="text-gray-600">Contrats de sous-traitance solides avec les principaux distributeurs de poisson pour un volume d'affaires constant.</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-bold text-[#0A2463] mb-6 text-center">Notre Rôle dans la Chaîne d'Approvisionnement</h3>
+                <div class="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0 md:space-x-4">
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-[#0A2463] rounded-full h-24 w-24 flex items-center justify-center mx-auto text-3xl">🏭</div>
+                        <p class="mt-2 font-semibold">Producteurs de Poisson</p>
+                    </div>
+                    <div class="text-5xl text-gray-300 font-thin hidden md:block">→</div>
+                    <div class="text-5xl text-gray-300 font-thin md:hidden">↓</div>
+                    <div class="text-center border-4 border-[#3E92CC] rounded-lg p-6 bg-blue-50">
+                         <div class="bg-[#3E92CC] text-white rounded-full h-24 w-24 flex items-center justify-center mx-auto text-3xl">⛟</div>
+                        <p class="mt-2 font-bold text-[#0A2463]">Horizon Bleu Logistique</p>
+                        <p class="text-sm text-gray-600">(Coordination & Assurance Qualité)</p>
+                    </div>
+                    <div class="text-5xl text-gray-300 font-thin hidden md:block">→</div>
+                    <div class="text-5xl text-gray-300 font-thin md:hidden">↓</div>
+                    <div class="text-center">
+                        <div class="bg-blue-100 text-[#0A2463] rounded-full h-24 w-24 flex items-center justify-center mx-auto text-3xl">🏢</div>
+                        <p class="mt-2 font-semibold">Distributeurs Nationaux</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="financials" class="mb-24 scroll-mt-20">
+            <h2 class="section-title mb-8">Planificateur Financier Interactif</h2>
+            <p class="text-lg text-gray-700 mb-12 max-w-4xl mx-auto">
+                Utilisez cet outil pour simuler les projections financières de l'entreprise. Ajustez les hypothèses clés telles que le nombre de camions et le revenu par camion pour voir l'impact en temps réel sur les coûts, les revenus et la rentabilité. Cela démontre la viabilité et l'évolutivité de notre modèle économique.
+            </p>
+
+            <div class="grid md:grid-cols-2 gap-12">
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-[#0A2463] mb-6">Hypothèses de Coûts & Revenus</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label for="num-trucks" class="block text-sm font-medium text-gray-700">Nombre de camions frigorifiques</label>
+                            <input type="range" id="num-trucks" min="1" max="10" value="3" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="text-center font-bold text-lg text-[#3E92CC] mt-2"><span id="num-trucks-value">3</span> camions</div>
+                        </div>
+                        
+                        <div>
+                            <label for="revenue-per-truck" class="block text-sm font-medium text-gray-700">Revenu mensuel moyen par camion (MAD)</label>
+                            <input type="range" id="revenue-per-truck" min="30000" max="100000" value="60000" step="1000" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                            <div class="text-center font-bold text-lg text-[#3E92CC] mt-2"><span id="revenue-per-truck-value">60,000</span> MAD</div>
+                        </div>
+
+                        <div class="pt-4">
+                            <h4 class="text-lg font-semibold text-gray-800">Coûts d'Investissement (Unique)</h4>
+                            <div class="flex justify-between mt-2">
+                                <span>Achat des camions</span>
+                                <span class="font-mono" id="truck-cost-total">900,000</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>Frais administratifs & licences</span>
+                                <span class="font-mono">50,000</span>
+                            </div>
+                             <div class="flex justify-between mt-1 font-bold border-t pt-2">
+                                <span>Total Investissement</span>
+                                <span class="font-mono" id="total-investment">950,000</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-4">
+                            <h4 class="text-lg font-semibold text-gray-800">Coûts Opérationnels Mensuels</h4>
+                            <div class="flex justify-between mt-2">
+                                <span>Salaires (chauffeurs, admin)</span>
+                                <span class="font-mono" id="salaries-total">36,000</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>Carburant & Entretien</span>
+                                <span class="font-mono" id="fuel-total">45,000</span>
+                            </div>
+                            <div class="flex justify-between mt-1">
+                                <span>Assurance & Autres</span>
+                                <span class="font-mono" id="insurance-total">9,000</span>
+                            </div>
+                            <div class="flex justify-between mt-1 font-bold border-t pt-2">
+                                <span>Total Mensuel</span>
+                                <span class="font-mono" id="monthly-costs-total">90,000</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 rounded-lg shadow-lg">
+                    <div class="chart-container h-[450px] md:h-auto">
+                        <canvas id="financialsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="founder" class="mb-24 scroll-mt-20">
+            <h2 class="section-title mb-8">Profil du Fondateur</h2>
+            <div class="bg-white p-8 rounded-lg shadow-lg flex flex-col md:flex-row items-center gap-8">
+<div class="w-32 h-32 rounded-full bg-gray-200 flex-shrink-0 flex items-center justify-center overflow-hidden">
+  <img src="./src/Pic.png" alt="Profile Photo" class="w-full h-full object-cover">
+</div>
+
+                <div>
+                    <h3 class="text-2xl font-bold text-[#0A2463]">MOJAHDI Tariq</h3>
+                    <p class="text-[#3E92CC] font-semibold mb-4">Entrepreneur en Logistique & Transport</p>
+                    <p class="text-gray-700 mb-4">Fort de plus de 4 ans d'expérience à la tête d'une entreprise de transport prospère, avec un contrat de sous-traitance majeur avec LafargeHolcim Maroc. Maîtrise complète de la gestion d'une flotte de camions mixtes, ainsi que de tous les aspects administratifs, financiers et opérationnels du secteur du transport au Maroc.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="pill bg-blue-100 text-blue-800">Gestion de Flotte</span>
+                        <span class="pill bg-green-100 text-green-800">Finance & Comptabilité</span>
+                        <span class="pill bg-yellow-100 text-yellow-800">Réglementation du Transport</span>
+                        <span class="pill bg-indigo-100 text-indigo-800">Négociation de Contrats</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="loan" class="scroll-mt-20">
+            <h2 class="section-title mb-8">Détails de la Demande de Prêt Intelaka</h2>
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-bold text-[#0A2463] mb-4">Structure de Financement</h3>
+                        <p class="text-gray-700 mb-6">La demande de financement est structurée pour couvrir les investissements essentiels et fournir un fonds de roulement suffisant pour la phase de démarrage, conformément aux directives du programme Intelaka.</p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between">
+                                <span class="font-semibold">Prêt d'Investissement Intelaka :</span>
+                                <span class="font-bold text-[#0A2463]" id="loan-investment-display">950,000 MAD</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="font-semibold">Prêt de Fonctionnement Intelaka :</span>
+                                <span class="font-bold text-[#0A2463]">250,000 MAD</span>
+                            </div>
+                             <div class="flex justify-between border-t-2 border-blue-200 mt-2 pt-2">
+                                <span class="font-semibold text-xl">Montant Total du Prêt :</span>
+                                <span class="font-bold text-xl text-[#3E92CC]" id="loan-total-display">1,200,000 MAD</span>
+                            </div>
+                        </div>
+                         <p class="text-sm text-gray-500 mt-4">Taux d'intérêt préférentiel de 2% (zone urbaine). Aucun cautionnement personnel requis.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold text-[#0A2463] mb-4">Utilisation des Fonds</h3>
+                        <p class="text-gray-700 mb-6">Les fonds seront alloués de manière stratégique pour garantir un lancement et une montée en puissance rapides et efficaces.</p>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✔</span>
+                                <div><span class="font-bold">Achat de 3 camions frigorifiques :</span><br> Équipement moderne pour garantir la chaîne du froid.</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✔</span>
+                                <div><span class="font-bold">Frais de démarrage :</span><br> Création de l'entreprise, licences et permis.</div>
+                            </li>
+                             <li class="flex items-start">
+                                <span class="text-green-500 mr-2">✔</span>
+                                <div><span class="font-bold">Fonds de roulement :</span><br> Couverture des 3-6 premiers mois de salaires, carburant et autres frais opérationnels.</div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mt-12">
+                    <a href="#" class="btn-primary text-lg">Préparer le Dossier de Candidature</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuBtn = document.getElementById('menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const marketCtx = document.getElementById('marketProblemChart').getContext('2d');
+            const marketChart = new Chart(marketCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Criée au Port', 'Marché de Gros', 'Marché de Détail'],
+                    datasets: [{
+                        label: 'Prix de la Sardine (MAD/kg)',
+                        data: [3, 8, 20],
+                        backgroundColor: ['#3E92CC', '#D6E6F2', '#0A2463'],
+                        borderColor: ['#3E92CC', '#D6E6F2', '#0A2463'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Parcours du Prix de la Sardine (MAD/kg)',
+                            font: {
+                                size: 18
+                            },
+                            color: '#0A2463'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Prix (MAD)'
+                            }
+                        }
+                    }
+                }
+            });
+
+            const numTrucksSlider = document.getElementById('num-trucks');
+            const revenuePerTruckSlider = document.getElementById('revenue-per-truck');
+            const numTrucksValue = document.getElementById('num-trucks-value');
+            const revenuePerTruckValue = document.getElementById('revenue-per-truck-value');
+            
+            const truckCostTotal = document.getElementById('truck-cost-total');
+            const totalInvestment = document.getElementById('total-investment');
+            const salariesTotal = document.getElementById('salaries-total');
+            const fuelTotal = document.getElementById('fuel-total');
+            const insuranceTotal = document.getElementById('insurance-total');
+            const monthlyCostsTotal = document.getElementById('monthly-costs-total');
+
+            const loanAmountDisplay = document.getElementById('loan-amount-display');
+            const loanInvestmentDisplay = document.getElementById('loan-investment-display');
+            const loanTotalDisplay = document.getElementById('loan-total-display');
+
+            const financialsCtx = document.getElementById('financialsChart').getContext('2d');
+            let financialsChart;
+
+            function formatNumber(num) {
+                return new Intl.NumberFormat('fr-FR').format(num);
+            }
+
+            function createFinancialsChart() {
+                const trucks = parseInt(numTrucksSlider.value);
+                const revenuePerTruck = parseInt(revenuePerTruckSlider.value);
+
+                const totalRevenue = trucks * revenuePerTruck;
+                const totalMonthlyCosts = parseInt(monthlyCostsTotal.textContent.replace(/\s/g, ''));
+                const monthlyProfit = totalRevenue - totalMonthlyCosts;
+
+                if (financialsChart) {
+                    financialsChart.destroy();
+                }
+
+                financialsChart = new Chart(financialsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Projections Mensuelles'],
+                        datasets: [
+                            {
+                                label: 'Revenus Totaux',
+                                data: [totalRevenue],
+                                backgroundColor: '#3E92CC',
+                            },
+                            {
+                                label: 'Coûts Totaux',
+                                data: [totalMonthlyCosts],
+                                backgroundColor: '#F2B705',
+                            },
+                            {
+                                label: 'Bénéfice Brut',
+                                data: [monthlyProfit],
+                                backgroundColor: '#4CAF50',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            title: {
+                                display: true,
+                                text: 'Projections Financières Mensuelles (MAD)',
+                                font: { size: 18 },
+                                color: '#0A2463'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed.y !== null) {
+                                            label += formatNumber(context.parsed.y) + ' MAD';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: function(value, index, values) {
+                                        return formatNumber(value) + ' MAD';
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateFinancials() {
+                const trucks = parseInt(numTrucksSlider.value);
+                const revenuePerTruck = parseInt(revenuePerTruckSlider.value);
+                
+                numTrucksValue.textContent = trucks;
+                revenuePerTruckValue.textContent = formatNumber(revenuePerTruck);
+
+                const truckCost = 300000;
+                const adminCost = 50000;
+                const workingCapital = 250000;
+                
+                const totalTruckCost = trucks * truckCost;
+                const investment = totalTruckCost + adminCost;
+                const totalLoan = investment + workingCapital;
+
+                truckCostTotal.textContent = formatNumber(totalTruckCost);
+                totalInvestment.textContent = formatNumber(investment);
+                loanAmountDisplay.textContent = formatNumber(totalLoan);
+                loanInvestmentDisplay.textContent = formatNumber(investment);
+                loanTotalDisplay.textContent = formatNumber(totalLoan);
+
+                const salaryPerTruck = 12000;
+                const fuelPerTruck = 15000;
+                const insurancePerTruck = 3000;
+
+                const totalSalaries = trucks * salaryPerTruck;
+                const totalFuel = trucks * fuelPerTruck;
+                const totalInsurance = trucks * insurancePerTruck;
+                const totalMonthly = totalSalaries + totalFuel + totalInsurance;
+
+                salariesTotal.textContent = formatNumber(totalSalaries);
+                fuelTotal.textContent = formatNumber(totalFuel);
+                insuranceTotal.textContent = formatNumber(totalInsurance);
+                monthlyCostsTotal.textContent = formatNumber(totalMonthly);
+
+                createFinancialsChart();
+            }
+
+            numTrucksSlider.addEventListener('input', updateFinancials);
+            revenuePerTruckSlider.addEventListener('input', updateFinancials);
+
+            updateFinancials();
+        });
+    </script>
+
+</body>
+</html>
+
