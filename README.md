@@ -4,7 +4,7 @@
 🌟 Overview
 ----
 
-This HTML file, business_plan_app.html, is a single-page interactive web application that serves as a dynamic business plan for "Horizon Bleu Logistique," a proposed fish 🐟 transportation 🚚 company in Laâyoune, Morocco 🇲🇦.
+This HTML file, index.html, is a single-page interactive web application that serves as a dynamic business plan for "Horizon Bleu Logistique," a proposed fish 🐟 transportation 🚚 company in Laâyoune, Morocco 🇲🇦.
 
 Its primary purpose is to present a compelling and data-driven case for a loan application through the Moroccan government's "Intelaka" financing program 💰.
 
